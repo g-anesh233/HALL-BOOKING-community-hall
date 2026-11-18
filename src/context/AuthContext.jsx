@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AuthContext } from './sessionContext'
+import { apiUrl } from '../api'
 
 function readCachedUser() {
   if (!localStorage.getItem('hallbookToken')) {
@@ -51,7 +52,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/me', {
+      const response = await fetch(apiUrl('/auth/me'), {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await response.json()

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import HallForm from '../components/HallForm'
 import ManagementHeader from '../components/ManagementHeader'
+import { apiUrl } from '../api'
 import '../App.css'
 
 function OwnerDashboard() {
@@ -15,10 +16,10 @@ function OwnerDashboard() {
 
     try {
       const [bookingResponse, hallResponse] = await Promise.all([
-        fetch('http://localhost:5000/api/owner/bookings', {
+        fetch(apiUrl('/owner/bookings'), {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        fetch('http://localhost:5000/api/halls/mine', {
+        fetch(apiUrl('/halls/mine'), {
           headers: { Authorization: `Bearer ${token}` }
         })
       ])
@@ -50,7 +51,7 @@ function OwnerDashboard() {
     setMessage('')
 
     try {
-      const response = await fetch('http://localhost:5000/api/halls', {
+      const response = await fetch(apiUrl('/halls'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +82,7 @@ function OwnerDashboard() {
     setSubmitting(true)
 
     try {
-      const response = await fetch(`http://localhost:5000/api/owner/bookings/${bookingId}/status`, {
+      const response = await fetch(apiUrl(`/owner/bookings/${bookingId}/status`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import '../App.css'
 import LogoutButton from '../components/LogoutButton'
 import { useAuth } from '../hooks/useAuth'
+import { apiUrl } from '../api'
 
 function MyBookings() {
   const [bookings, setBookings] = useState([])
@@ -33,7 +34,7 @@ function MyBookings() {
         }
 
         const response = await fetch(
-          'http://localhost:5000/api/bookings/my-bookings',
+          apiUrl('/bookings/my-bookings'),
           {
             headers: {
               Authorization: `Bearer ${token}`

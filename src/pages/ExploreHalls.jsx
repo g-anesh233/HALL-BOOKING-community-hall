@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import LogoutButton from '../components/LogoutButton'
 import { useAuth } from '../hooks/useAuth'
+import { apiUrl } from '../api'
 
 const fallbackHalls = [
   {
@@ -93,7 +94,7 @@ function ExploreHalls() {
   useEffect(() => {
     const fetchHalls = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/halls')
+        const response = await fetch(apiUrl('/halls'))
 
         if (!response.ok) {
           throw new Error(`Failed to fetch halls (${response.status})`)

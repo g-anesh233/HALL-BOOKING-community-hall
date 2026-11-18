@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import HallForm from '../components/HallForm'
 import ManagementHeader from '../components/ManagementHeader'
+import { apiUrl } from '../api'
 import '../App.css'
 
-const apiBase = 'http://localhost:5000/api'
-
 async function requestJson(path, options = {}) {
-  const response = await fetch(`${apiBase}${path}`, {
+  const response = await fetch(apiUrl(path), {
     ...options,
     headers: {
       Authorization: `Bearer ${localStorage.getItem('hallbookToken')}`,

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import ManagementHeader from '../components/ManagementHeader'
+import { apiUrl } from '../api'
 import '../App.css'
 
 function OwnerApplication() {
@@ -17,7 +18,7 @@ function OwnerApplication() {
     setMessage('')
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/owner-application', {
+      const response = await fetch(apiUrl('/auth/owner-application'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

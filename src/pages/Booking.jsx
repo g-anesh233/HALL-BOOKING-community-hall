@@ -3,6 +3,7 @@ import '../App.css'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import LogoutButton from '../components/LogoutButton'
 import { useAuth } from '../hooks/useAuth'
+import { apiUrl } from '../api'
 
 function Booking() {
   const location = useLocation()
@@ -61,7 +62,7 @@ function Booking() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/bookings', {
+      const response = await fetch(apiUrl('/bookings'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

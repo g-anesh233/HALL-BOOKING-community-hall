@@ -2,6 +2,7 @@ import { useState } from 'react'
 import '../App.css'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { apiUrl } from '../api'
 
 function Login() {
   const [message, setMessage] = useState('')
@@ -16,7 +17,7 @@ function Login() {
   const password = e.target.password.value
 
   try {
-    const response = await fetch('http://localhost:5000/api/auth/login', {
+    const response = await fetch(apiUrl('/auth/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

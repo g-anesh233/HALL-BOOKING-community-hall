@@ -2,6 +2,7 @@ import { useState } from 'react'
 import '../App.css'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { apiUrl } from '../api'
 
 function Register() {
   const [message, setMessage] = useState('')
@@ -16,7 +17,7 @@ const handleRegister = async (e) => {
   const password = e.target.password.value
 
   try {
-    const response = await fetch('http://localhost:5000/api/auth/register', {
+    const response = await fetch(apiUrl('/auth/register'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
