@@ -15,9 +15,5 @@ The React Compiler is not enabled on this template because of its impact on dev 
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
-## Email verification
-
-New accounts must verify their email before signing in. Configure the SMTP and
-`CLIENT_URL` variables shown in `server/.env.example` in the server's environment.
-For local development, copy that file to `server/.env` and use your mail provider's
-SMTP credentials. Set `CLIENT_URL` to the URL where the HallBook frontend is hosted.
+Registration immediately signs users in and blocks likely misspellings of common
+email-provider domains, such as `gnail.com` when `gmail.com` was probably intended.

@@ -1,6 +1,5 @@
 import Register from './pages/Register'
 import Login from './pages/Login'
-import VerifyEmail from './pages/VerifyEmail'
 import Booking from './pages/Booking'
 import HallDetails from './pages/HallDetails'
 import './App.css'
@@ -402,7 +401,6 @@ function App() {
 
   <Route path="/login" element={<Login />} />
 <Route path="/register" element={<Register />} />
-<Route path="/verify-email" element={<VerifyEmail />} />
 
 </Routes>
 

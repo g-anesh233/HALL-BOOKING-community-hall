@@ -1808,21 +1808,6 @@
   font-size: 14px;
 }
 
-.auth-form .auth-message[role="status"] {
-  color: #166534;
-}
-
-.auth-verification-link {
-  display: inline-flex;
-  justify-content: center;
-  padding: 14px 20px;
-  border-radius: 8px;
-  background: #1d4ed8;
-  color: #fff;
-  font-weight: 700;
-  text-decoration: none;
-}
-
 .auth-form .auth-switch {
   margin: 12px 0 0;
   color: #64748b;

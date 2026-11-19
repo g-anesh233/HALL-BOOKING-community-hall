@@ -1,10 +1,9 @@
 const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
 const User = require('../models/User')
 const authMiddleware = require('../middleware/authMiddleware')
-const { sendVerificationEmail } = require('../utils/email')
+const { getLikelyMisspelledDomain } = require('../utils/emailDomain')
 
 const router = express.Router()
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -89,46 +88,43 @@ router.post('/register', async (req, res) => {
         }
 
         const normalizedEmail = email.trim().toLowerCase()
+        const emailDomain = normalizedEmail.split('@')[1]
+        const suggestedDomain = getLikelyMisspelledDomain(emailDomain)
+
+        if (suggestedDomain) {
+            return res.status(400).json({
+                message: `Check the spelling of your email domain. Did you mean @${suggestedDomain}?`
+            })
+        }
+
         const existingUser = await User.findOne({
             email: { $regex: `^${escapeRegex(normalizedEmail)}$`, $options: 'i' }
         })
 
-        if (existingUser?.emailVerified) {
+        if (existingUser) {
             return res.status(400).json({
                 message: 'Email already registered'
             })
         }
 
-        const verificationToken = crypto.randomBytes(32).toString('hex')
-        const verificationTokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex')
-        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000)
-
-        let newUser = existingUser
-        if (!newUser) {
-            const hashedPassword = await bcrypt.hash(password, 10)
-            newUser = new User({
-                name: name.trim(),
-                email: normalizedEmail,
-                password: hashedPassword,
-                emailVerified: false
-            })
-        }
-
-        newUser.emailVerificationToken = verificationTokenHash
-        newUser.emailVerificationExpires = verificationExpires
+        const hashedPassword = await bcrypt.hash(password, 10)
+        const newUser = new User({
+            name: name.trim(),
+            email: normalizedEmail,
+            password: hashedPassword
+        })
         await newUser.save()
 
-        try {
-            await sendVerificationEmail(normalizedEmail, verificationToken)
-        } catch (error) {
-            console.error('Verification email delivery failed:', error.name)
-            return res.status(503).json({
-                message: 'Could not send the verification email. Submit the form again to retry.'
-            })
-        }
+        const token = jwt.sign(
+            { userId: newUser._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        )
 
-        res.status(existingUser ? 200 : 201).json({
-            message: `A verification link has been sent to ${normalizedEmail}. Verify your email within 24 hours to activate your account.`
+        res.status(201).json({
+            message: 'Registration successful!',
+            token,
+            user: serializeUser(newUser)
         })
 
     } catch (error) {
@@ -136,36 +132,6 @@ router.post('/register', async (req, res) => {
         res.status(500).json({
             message: 'Server error'
         })
-    }
-})
-
-router.post('/verify-email', async (req, res) => {
-    try {
-        const { token } = req.body
-
-        if (typeof token !== 'string' || !/^[a-f0-9]{64}$/.test(token)) {
-            return res.status(400).json({ message: 'This verification link is invalid or has expired.' })
-        }
-
-        const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
-        const user = await User.findOne({
-            emailVerificationToken: tokenHash,
-            emailVerificationExpires: { $gt: new Date() }
-        })
-
-        if (!user) {
-            return res.status(400).json({ message: 'This verification link is invalid or has expired.' })
-        }
-
-        user.emailVerified = true
-        user.emailVerificationToken = undefined
-        user.emailVerificationExpires = undefined
-        await user.save()
-
-        res.status(200).json({ message: 'Your email has been verified. You can now sign in.' })
-    } catch (error) {
-        console.error('Email verification failed:', error.name)
-        res.status(500).json({ message: 'Failed to verify your email. Please try again.' })
     }
 })
 
@@ -185,12 +151,6 @@ router.post('/login', async (req, res) => {
         if (!user) {
             return res.status(400).json({
                 message: 'Invalid email or password'
-            })
-        }
-
-        if (!user.emailVerified) {
-            return res.status(403).json({
-                message: 'Please verify your email using the link we sent before signing in.'
             })
         }
 

@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import '../App.css'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import { apiUrl } from '../api'
 
 function Register() {
   const [message, setMessage] = useState('')
-  const [verificationPending, setVerificationPending] = useState(false)
+  const navigate = useNavigate()
+  const { setSession } = useAuth()
 
 const handleRegister = async (e) => {
   e.preventDefault()
@@ -26,16 +28,14 @@ const handleRegister = async (e) => {
     const data = await response.json()
 
     if (!response.ok) {
-      setVerificationPending(false)
       setMessage(data.message)
       return
     }
 
-    setVerificationPending(true)
-    setMessage(data.message)
+    setSession(data.token, data.user)
+    navigate('/dashboard', { replace: true })
 
   } catch {
-    setVerificationPending(false)
     setMessage('Unable to connect to server. Please try again.')
   }
 }
@@ -94,15 +94,9 @@ const handleRegister = async (e) => {
               />
             </div>
 
-            <button type="submit">
-              {verificationPending ? 'Resend verification email' : 'Create account'}
-            </button>
+            <button type="submit">Create account</button>
 
-            {message && (
-              <p className="auth-message" role={verificationPending ? 'status' : 'alert'}>
-                {message}
-              </p>
-            )}
+            {message && <p className="auth-message" role="alert">{message}</p>}
             <p className="auth-switch">
               Already have an account? <Link to="/login">Sign in</Link>
             </p>
