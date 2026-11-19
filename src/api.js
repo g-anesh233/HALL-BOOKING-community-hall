@@ -1,6 +1,6 @@
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL
 const defaultApiBaseUrl = import.meta.env.PROD
-  ? '/api'
+  ? 'https://hallbook-backend.onrender.com/api'
   : 'http://localhost:5000/api'
 
 const apiBaseUrl = (configuredApiBaseUrl || defaultApiBaseUrl)
