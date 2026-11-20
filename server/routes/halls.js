@@ -29,7 +29,12 @@ router.get('/', async (req, res) => {
 
 router.get('/mine', authMiddleware, ownerMiddleware, async (req, res) => {
     try {
-        const halls = await Hall.find({ ownerId: req.user.userId }).sort({ createdAt: -1 })
+        const halls = await Hall.find({
+            $or: [
+                { createdBy: req.user.userId },
+                { createdBy: { $exists: false }, ownerId: req.user.userId }
+            ]
+        }).sort({ createdAt: -1 })
         res.status(200).json(halls)
     } catch (error) {
         console.error('Failed to fetch owner halls:', error.name)
@@ -50,6 +55,7 @@ router.post('/', authMiddleware, ownerMiddleware, async (req, res) => {
         const hall = await Hall.create({
             ...hallInput,
             ownerId: req.user.userId,
+            createdBy: req.user.userId,
             status: 'Pending'
         })
 
@@ -67,7 +73,10 @@ router.delete('/:id', authMiddleware, ownerMiddleware, async (req, res) => {
     try {
         const hall = await Hall.findOneAndDelete({
             _id: req.params.id,
-            ownerId: req.user.userId
+            $or: [
+                { createdBy: req.user.userId },
+                { createdBy: { $exists: false }, ownerId: req.user.userId }
+            ]
         })
 
         if (!hall) {

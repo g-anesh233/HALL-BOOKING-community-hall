@@ -8,21 +8,6 @@ const prepareHallInput = require('../utils/hallInput')
 
 const router = express.Router()
 
-router.get('/owners', authMiddleware, adminMiddleware, async (req, res) => {
-    try {
-        const owners = await User.find({
-            $or: [
-                { role: 'owner', ownerApplicationStatus: 'approved' },
-                { role: 'admin' }
-            ]
-        }).select('name email')
-        res.status(200).json(owners)
-    } catch (error) {
-        console.error('Failed to fetch venue owners:', error.name)
-        res.status(500).json({ message: 'Failed to fetch venue owners' })
-    }
-})
-
 router.get('/owner-applications', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const applications = await User.find({
@@ -79,6 +64,7 @@ router.get('/halls', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const halls = await Hall.find()
             .populate('ownerId', 'name email')
+            .populate('createdBy', 'name email')
             .sort({ createdAt: -1 })
         res.status(200).json(halls)
     } catch (error) {
@@ -130,42 +116,6 @@ router.patch('/halls/:id/status', authMiddleware, adminMiddleware, async (req, r
     } catch (error) {
         console.error('Hall review failed:', error.name)
         res.status(500).json({ message: 'Failed to update hall status' })
-    }
-})
-
-router.patch('/halls/:id/owner', authMiddleware, adminMiddleware, async (req, res) => {
-    try {
-        const { ownerId } = req.body
-        let owner = null
-
-        if (ownerId) {
-            owner = await User.findOne({
-                _id: ownerId,
-                $or: [
-                    { role: 'owner', ownerApplicationStatus: 'approved' },
-                    { role: 'admin' }
-                ]
-            })
-
-            if (!owner) {
-                return res.status(400).json({ message: 'Select an approved venue owner or platform admin' })
-            }
-        }
-
-        const hall = await Hall.findByIdAndUpdate(
-            req.params.id,
-            { ownerId: owner ? owner._id : null },
-            { new: true, runValidators: true }
-        ).populate('ownerId', 'name email')
-
-        if (!hall) {
-            return res.status(404).json({ message: 'Hall not found' })
-        }
-
-        res.status(200).json({ message: 'Hall owner updated', hall })
-    } catch (error) {
-        console.error('Hall owner assignment failed:', error.name)
-        res.status(500).json({ message: 'Failed to assign hall owner' })
     }
 })
 

@@ -26,7 +26,6 @@ function AdminDashboard() {
   const [bookings, setBookings] = useState([])
   const [applications, setApplications] = useState([])
   const [halls, setHalls] = useState([])
-  const [owners, setOwners] = useState([])
   const [activeTab, setActiveTab] = useState('bookings')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -34,16 +33,14 @@ function AdminDashboard() {
 
   const loadDashboard = useCallback(async () => {
     try {
-      const [bookingData, applicationData, hallData, ownerData] = await Promise.all([
+      const [bookingData, applicationData, hallData] = await Promise.all([
         requestJson('/admin/bookings'),
         requestJson('/admin/owner-applications'),
-        requestJson('/admin/halls'),
-        requestJson('/admin/owners')
+        requestJson('/admin/halls')
       ])
       setBookings(bookingData)
       setApplications(applicationData)
       setHalls(hallData)
-      setOwners(ownerData)
     } catch (error) {
       setMessage(error.message || 'Unable to load admin dashboard.')
     } finally {
@@ -112,12 +109,6 @@ function AdminDashboard() {
     'Hall status updated.'
   )
 
-  const assignHall = (hallId, ownerId) => performAction(
-    `/admin/halls/${hallId}/owner`,
-    { ownerId: ownerId || null },
-    'Hall owner updated.'
-  )
-
   return (
     <main className="management-page">
       <ManagementHeader
@@ -184,7 +175,7 @@ function AdminDashboard() {
                   <span className="management-eyebrow">PARTNER ONBOARDING</span>
                   <h2>Owner applications</h2>
                 </div>
-                <p>Approved owners can submit multiple halls. They only see bookings for halls assigned to them.</p>
+                  <p>Approved owners submit halls. Booking requests remain with the owner who created each hall.</p>
               </div>
               {applications.length === 0 ? <p className="management-empty">There are no owner applications awaiting review.</p> : (
                 <div className="management-card-grid">
@@ -236,19 +227,9 @@ function AdminDashboard() {
                         <button className="management-danger" disabled={submitting} onClick={() => changeHallStatus(hall._id, 'Rejected')}>Reject</button>
                       </div>
                     )}
-                    <label className="management-owner-select">
-                      Assigned owner
-                      <select
-                        value={hall.ownerId?._id || hall.ownerId || ''}
-                        disabled={submitting}
-                        onChange={(event) => assignHall(hall._id, event.target.value)}
-                      >
-                        <option value="">Unassigned</option>
-                        {owners.map((owner) => (
-                          <option value={owner._id} key={owner._id}>{owner.name} ({owner.email})</option>
-                        ))}
-                      </select>
-                    </label>
+                    {hall.createdBy || hall.ownerId ? (
+                      <p><strong>Created by:</strong> {hall.ownerId?.name || hall.createdBy?.name || 'Registered owner'}</p>
+                    ) : null}
                   </article>
                 ))}
               </div>

@@ -186,7 +186,7 @@ function OwnerDashboard() {
                 <span className="management-eyebrow">BOOKING INBOX</span>
                 <h2>Requests for your halls</h2>
               </div>
-              <p>Only bookings for halls assigned to your account appear here.</p>
+              <p>Only bookings for halls you created appear here.</p>
             </div>
             {bookings.length === 0 ? <p className="management-empty">No booking requests yet. New requests for your approved halls will appear here.</p> : (
               <div className="management-card-grid">
@@ -231,7 +231,7 @@ function OwnerDashboard() {
                 <span className="management-eyebrow">YOUR LISTINGS</span>
                 <h2>Halls and review status</h2>
               </div>
-              <p>Approved halls are visible to customers. New submissions are reviewed by the HallBook team.</p>
+              <p>Approved halls are visible to customers. Booking requests go only to you because you created these listings.</p>
             </div>
             {halls.length === 0 ? <p className="management-empty">You have not submitted any halls yet.</p> : (
               <div className="management-card-grid">

@@ -35,6 +35,12 @@ const hallSchema = new mongoose.Schema({
         default: null,
         index: true
     },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+        index: true
+    },
     status: {
         type: String,
         enum: ['Pending', 'Approved', 'Rejected'],

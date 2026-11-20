@@ -8,7 +8,12 @@ const router = express.Router()
 
 router.get('/bookings', authMiddleware, ownerMiddleware, async (req, res) => {
     try {
-        const halls = await Hall.find({ ownerId: req.user.userId }).select('_id')
+        const halls = await Hall.find({
+            $or: [
+                { createdBy: req.user.userId },
+                { createdBy: { $exists: false }, ownerId: req.user.userId }
+            ]
+        }).select('_id')
         const bookings = await Booking.find({
             hall: { $in: halls.map((hall) => hall._id) }
         }).sort({ createdAt: -1 })
@@ -28,10 +33,15 @@ router.patch('/bookings/:id/status', authMiddleware, ownerMiddleware, async (req
             return res.status(400).json({ message: 'Invalid booking status' })
         }
 
-        const booking = await Booking.findById(req.params.id).populate('hall', 'ownerId')
+        const booking = await Booking.findById(req.params.id).populate('hall', 'ownerId createdBy')
 
-        if (!booking || !booking.hall || String(booking.hall.ownerId) !== req.user.userId) {
-            return res.status(404).json({ message: 'Booking not found for your halls' })
+        if (!booking || !booking.hall) {
+            return res.status(404).json({ message: 'Booking not found for your created halls' })
+        }
+
+        const creatorId = booking.hall.createdBy || booking.hall.ownerId
+        if (!creatorId || String(creatorId) !== req.user.userId) {
+            return res.status(404).json({ message: 'Booking not found for your created halls' })
         }
 
         if (booking.status !== 'Pending') {
