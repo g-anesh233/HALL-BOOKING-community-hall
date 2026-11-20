@@ -11,6 +11,7 @@ router.get('/bookings', authMiddleware, ownerMiddleware, async (req, res) => {
         const halls = await Hall.find({
             $or: [
                 { createdBy: req.user.userId },
+                { createdBy: null, ownerId: req.user.userId },
                 { createdBy: { $exists: false }, ownerId: req.user.userId }
             ]
         }).select('_id')

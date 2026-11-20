@@ -4,6 +4,7 @@ const cors = require('cors')
 require('dotenv').config()
 
 const app = express()
+const Hall = require('./models/Hall')
 const authRoutes = require('./routes/auth')
 const hallRoutes = require('./routes/halls')
 const bookingRoutes = require('./routes/bookings')
@@ -29,6 +30,23 @@ const startServer = async () => {
         await mongoose.connect(process.env.MONGO_URI)
 
         console.log('MongoDB Connected Successfully!')
+
+        const hallsMissingCreator = await Hall.find({
+            ownerId: { $ne: null },
+            $or: [
+                { createdBy: null },
+                { createdBy: { $exists: false } }
+            ]
+        }).select('_id ownerId')
+
+        for (const hall of hallsMissingCreator) {
+            hall.createdBy = hall.ownerId
+            await hall.save()
+        }
+
+        if (hallsMissingCreator.length) {
+            console.log(`Linked ${hallsMissingCreator.length} existing hall(s) to their creator`)
+        }
 
         const PORT = process.env.PORT || 5000
 

@@ -32,6 +32,7 @@ router.get('/mine', authMiddleware, ownerMiddleware, async (req, res) => {
         const halls = await Hall.find({
             $or: [
                 { createdBy: req.user.userId },
+                { createdBy: null, ownerId: req.user.userId },
                 { createdBy: { $exists: false }, ownerId: req.user.userId }
             ]
         }).sort({ createdAt: -1 })
@@ -75,6 +76,7 @@ router.delete('/:id', authMiddleware, ownerMiddleware, async (req, res) => {
             _id: req.params.id,
             $or: [
                 { createdBy: req.user.userId },
+                { createdBy: null, ownerId: req.user.userId },
                 { createdBy: { $exists: false }, ownerId: req.user.userId }
             ]
         })
