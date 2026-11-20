@@ -91,12 +91,6 @@ function AdminDashboard() {
     }
   }
 
-  const changeBookingStatus = (bookingId, status) => performAction(
-    `/admin/bookings/${bookingId}/status`,
-    { status },
-    'Booking updated.'
-  )
-
   const changeApplicationStatus = (userId, status) => performAction(
     `/admin/owner-applications/${userId}/status`,
     { status },
@@ -156,10 +150,7 @@ function AdminDashboard() {
                       <p><strong>Guests:</strong> {booking.guests} · <strong>Duration:</strong> {booking.duration} days</p>
                       <p><strong>Total:</strong> ₹{Number(booking.totalPrice).toLocaleString('en-IN')}</p>
                       {booking.status === 'Pending' && (
-                        <div className="management-actions">
-                          <button disabled={submitting} onClick={() => changeBookingStatus(booking._id, 'Approved')}>Approve</button>
-                          <button className="management-danger" disabled={submitting} onClick={() => changeBookingStatus(booking._id, 'Rejected')}>Reject</button>
-                        </div>
+                        <p><strong>Decision:</strong> Waiting for the hall creator</p>
                       )}
                     </article>
                   ))}

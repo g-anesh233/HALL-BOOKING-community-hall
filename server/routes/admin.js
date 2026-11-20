@@ -135,40 +135,4 @@ router.get('/bookings', authMiddleware, adminMiddleware, async (req, res) => {
     }
 })
 
-// Approve or reject a booking
-router.patch('/bookings/:id/status', authMiddleware, adminMiddleware, async (req, res) => {
-    try {
-        const { status } = req.body
-
-        if (!['Approved', 'Rejected'].includes(status)) {
-            return res.status(400).json({
-                message: 'Invalid booking status'
-            })
-        }
-
-        const booking = await Booking.findByIdAndUpdate(
-            req.params.id,
-            { status },
-            { new: true, runValidators: true }
-        )
-
-        if (!booking) {
-            return res.status(404).json({
-                message: 'Booking not found'
-            })
-        }
-
-        res.status(200).json({
-            message: `Booking ${status.toLowerCase()} successfully!`,
-            booking
-        })
-
-    } catch (error) {
-        console.error('Admin booking update failed:', error.name)
-        res.status(500).json({
-            message: 'Failed to update booking status'
-        })
-    }
-})
-
 module.exports = router
