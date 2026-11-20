@@ -4698,6 +4698,11 @@
   margin-top: 14px;
 }
 
+.owner-hall-actions {
+  margin-right: 18px;
+  margin-left: 18px;
+}
+
 .owner-hall-facts span {
   display: grid;
   gap: 3px;

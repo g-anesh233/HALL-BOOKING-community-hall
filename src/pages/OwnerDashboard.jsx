@@ -108,6 +108,40 @@ function OwnerDashboard() {
     }
   }
 
+  const deleteHall = async (hallId, hallName) => {
+    if (!window.confirm(`Delete "${hallName}"? This will also remove its booking requests.`)) {
+      return
+    }
+
+    setMessage('')
+    setSubmitting(true)
+
+    try {
+      const response = await fetch(apiUrl(`/halls/${hallId}`), {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('hallbookToken')}`
+        }
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        setMessage(data.message || 'Unable to delete hall.')
+        return
+      }
+
+      setHalls((current) => current.filter((hall) => hall._id !== hallId))
+      setBookings((current) => current.filter((booking) => (
+        String(booking.hall?._id || booking.hall) !== hallId
+      )))
+      setMessage(data.message)
+    } catch {
+      setMessage('Unable to connect to the server.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const pendingBookings = bookings.filter((booking) => booking.status === 'Pending').length
 
   return (
@@ -212,6 +246,16 @@ function OwnerDashboard() {
                     <div className="owner-hall-facts">
                       <span>Capacity <strong>{hall.capacity}</strong></span>
                       <span>Per day <strong>₹{Number(hall.price).toLocaleString('en-IN')}</strong></span>
+                    </div>
+                    <div className="management-actions owner-hall-actions">
+                      <button
+                        className="management-danger"
+                        type="button"
+                        disabled={submitting}
+                        onClick={() => deleteHall(hall._id, hall.name)}
+                      >
+                        {submitting ? 'Deleting…' : 'Delete hall'}
+                      </button>
                     </div>
                   </article>
                 ))}

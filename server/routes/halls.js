@@ -1,4 +1,5 @@
 const express = require('express')
+const Booking = require('../models/Booking')
 const Hall = require('../models/Hall')
 const authMiddleware = require('../middleware/authMiddleware')
 const ownerMiddleware = require('../middleware/ownerMiddleware')
@@ -59,6 +60,30 @@ router.post('/', authMiddleware, ownerMiddleware, async (req, res) => {
     } catch (error) {
         console.error('Hall submission failed:', error.name)
         res.status(500).json({ message: 'Failed to submit hall' })
+    }
+})
+
+router.delete('/:id', authMiddleware, ownerMiddleware, async (req, res) => {
+    try {
+        const hall = await Hall.findOneAndDelete({
+            _id: req.params.id,
+            ownerId: req.user.userId
+        })
+
+        if (!hall) {
+            return res.status(404).json({
+                message: 'Hall not found or you do not have permission to delete it'
+            })
+        }
+
+        await Booking.deleteMany({ hall: hall._id })
+
+        res.status(200).json({
+            message: 'Hall deleted successfully'
+        })
+    } catch (error) {
+        console.error('Hall deletion failed:', error.name)
+        res.status(500).json({ message: 'Failed to delete hall' })
     }
 })
 
